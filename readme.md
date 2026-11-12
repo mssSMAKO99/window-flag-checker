@@ -1,21 +1,35 @@
-# 🕵️‍♂️ Universal Window Flags Inspector (Professional Window Snitch)
+# Universal Window Inspector
 
-A tiny C# console snitch that interrogates Windows about every visible window on your screen. Built specifically to check if your `0x11` anti-capture cloak actually works or if you're accidentally leaking your screen to Discord.
+A small console utility for Windows that inspects the windows of every
+running process in real time and reports their extended flags: visibility,
+owner window, `WS_EX_TOOLWINDOW` / `WS_EX_APPWINDOW` styles, and — most
+importantly — the **display affinity** (`SetWindowDisplayAffinity`).
 
-## 🔍 What this snitch exposes
-* **Process & PID:** Who birthed this window (e.g., `javaw.exe`).
-* **HWND:** The window's government ID number.
-* **Title & Class:** Its legal name and species (modern Minecraft is a `GLFW30`).
-* **Capture Status:**
-  * `0x00` — Naked window (OBS and screenshots see everything).
-  * `0x11` — Stealth mode active (pure void on recordings).
-* **Taskbar:** Tells you if the window is still chilling on your taskbar / `Alt+Tab` or successfully banished to the shadow realm.
+The tool is especially useful for spotting windows that:
 
-## 🎮 How to use
-1. Run the `.exe`.
-3. Type part of a process name or window title (like `javaw` or `chrome`) and hit **Enter**.
-4. Or just smash **Enter** with an empty box to dox *every* visible window on your PC.
-5. Hit **Enter** again whenever you want to refresh the snitch report.
+- are hidden from the taskbar and Alt+Tab;
+- are excluded from screen capture (`WDA_EXCLUDEFROMCAPTURE`);
+- render as a black rectangle when captured (`WDA_MONITOR`);
+- belong to elevated processes (reported as `Access Denied` when reading
+  the affinity).
 
-## 🤷‍♂️ Why it's cool
-Zero admin rights needed. It doesn't touch or poke other apps' memory—it just politely asks `user32.dll` for the gossip. Great for making sure Windows didn't reset your `0x11` flag after you alt-tabbed too aggressively.
+## Features
+
+- Filter by **process name**, **window title**, **window class**, **PID**, or
+  **HWND** (hexadecimal, e.g. `0x1A2B3C`).
+- An empty filter lists every active and protected window.
+- Determines taskbar hiding via the combination of `WS_EX_TOOLWINDOW`,
+  `WS_EX_APPWINDOW`, and the presence of an owner window.
+- Human-readable capture protection state:
+  - `WDA_NONE` — ordinary window;
+  - `WDA_MONITOR` — renders as a black screen when captured;
+  - `WDA_EXCLUDEFROMCAPTURE` — fully excluded from capture;
+  - `Access Denied` — the window belongs to a process with higher integrity.
+- Cyclic scanning: press Enter after inspecting the results to refresh the list.
+
+## Usage
+
+1. Run `WindowFlagChecker.exe` (recommended: as Administrator, so that
+   affinity of elevated processes is readable).
+2. Type a filter or leave the line empty and press Enter.
+3. Inspect the results. Press Enter again to rescan.
